@@ -1,16 +1,26 @@
 from common.config import AppConfig
-from common import utils
 
 from connectors.github import GitHubConnector
 
 import parsers
 
-import sys, logging
+import argparse, sys, logging
 
 logging.basicConfig(filename='log.log',level=logging.DEBUG)
 
 cfg = AppConfig()
 ghc = GitHubConnector(cfg.get_api_key(), cfg.get_repo())
+
+def setup_argparse():
+    """Sets up argparse"""
+    parser = argparse.ArgumentParser(description='Blasts issues to a given list of users')
+    parser.add_argument('csv', metavar='csv', type=str,
+                        help='filename of the CSV containing a list of GitHub usernames')
+    parser.add_argument('msg', metavar='markdown', type=str,
+                        help='filename of file containing Markdown')
+    parser.add_argument('title', metavar='title', type=str,
+                        help='title for GitHub issue')
+    return parser
 
 def prompt_user():
     """
@@ -56,18 +66,13 @@ def blast_issues(csv_file, title, msg_file):
 
 if __name__ == '__main__':
     logging.info('Kena Arrowed - GitHub issue manager started!')
-    csv, msg, title = utils.get_arguments(3)
+    parser = setup_argparse()
+    args = parser.parse_args()
 
-    if not (csv or msg):
-        csv, msg = prompt_user()
+    logging.debug('Issue title: %s', args.title)
+    logging.debug('CSV file: %s and MD file: %s', args.csv, args.msg)
 
-    if not title:
-        title = 'An Issue'
-
-    logging.debug('Issue title: %s', title)
-    logging.debug('CSV file: %s and MD file: %s', csv, msg)
-
-    if parsers.common.are_files_readable(csv, msg):
-        blast_issues(csv, title, msg)
+    if parsers.common.are_files_readable(args.csv, args.msg):
+        blast_issues(args.csv, args.title, args.msg)
     else:
         sys.exit(1)
