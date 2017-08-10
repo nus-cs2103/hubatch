@@ -20,6 +20,8 @@ def setup_argparse():
                         help='filename of file containing Markdown')
     parser.add_argument('title', metavar='title', type=str,
                         help='title for GitHub issue')
+    parser.add_argument('-s', '--start-from', metavar='username', type=str,
+                        help='start adding from a particular user (inclusive) in the CSV')
     return parser
 
 def prompt_user():
@@ -31,13 +33,16 @@ def prompt_user():
 
     return csv, msg
 
-def blast_issues(csv_file, title, msg_file):
+def blast_issues(csv_file, title, msg_file, start_from):
     """
     Creates a unique issue with identical content for
     every GitHub user in a specified CSV file
     """
     user_list = parsers.csvparser.get_rows_as_list(csv_file)
     message = parsers.common.get_contents(msg_file)
+
+    if start_from and start_from in user_list:
+        user_list = user_list[user_list.index(start_from):]
 
     failed_users = []
 
@@ -46,8 +51,9 @@ def blast_issues(csv_file, title, msg_file):
 
     if quota < len(user_list):
         num_issues = quota
+        print('Insufficient quota! Run again (when quota resets) from', user_list[quota], 'user onwards!')
         logging.warn('Insufficient API quota!')
-        logging.warn('Creating issues for users up till: %s', user_list[quota - 1])
+        logging.warn('Creating issues for users up till: %s (Next user: %s)', user_list[quota - 1],  user_list[quota])
 
     logging.info('Creating issues for %d user(s)', num_issues)
 
@@ -73,6 +79,6 @@ if __name__ == '__main__':
     logging.debug('CSV file: %s and MD file: %s', args.csv, args.msg)
 
     if parsers.common.are_files_readable(args.csv, args.msg):
-        blast_issues(args.csv, args.title, args.msg)
+        blast_issues(args.csv, args.title, args.msg, args.start_from)
     else:
         sys.exit(1)
