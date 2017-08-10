@@ -7,6 +7,7 @@ class GitHubConnector:
         try:
             self.gh = Github(apikey)
             self.repo = self.gh.get_repo(repo)
+            self.labels = self.get_labels()
         except GithubException as e:
             GitHubConnector.log_exception(e.data)
 
@@ -19,20 +20,43 @@ class GitHubConnector:
         logging.debug('API Quota: %d out of %d', ratelimit.rate.remaining, ratelimit.rate.limit)
         return True if ratelimit.rate.remaining > 0 else False
 
+    def get_labels(self):
+        """Load & cache labels from the repository"""
+        try:
+            return self.repo.get_labels()
+        except GithubException as e:
+            GitHubConnector.log_exception(e.data)
+            return []
+
+    def has_label(self, lbl):
+        """Checks if repo contains a label with the same name"""
+        return any(lbl_obj.name == lbl for lbl_obj in self.labels)
+
+    def str_to_label(self, lbl):
+        """Converts a label name to a label object"""
+        return next((lbl_obj for lbl_obj in self.labels if lbl_obj.name == lbl), None)
+
+    def strs_to_labels(self, strs):
+        """Converts a list of label names to their respective label objects"""
+        return [self.str_to_label(lbl) for lbl in strs if self.has_label(lbl)]
+
     def get_remaining_quota(self):
         ratelimit = self.gh.get_rate_limit()
         return ratelimit.rate.remaining
 
-    def create_issue(self, title, msg, assignee):
+    def create_issue(self, title, msg, assignee, labels=[]):
         """Creates an Issue in a given repository"""
         if not self.is_api_available():
             return False
 
         logging.info('Creating issue %s for %s', title, assignee)
+        lbl_objs = self.strs_to_labels(labels)
 
         try:
-            issue = self.repo.create_issue(title, body=msg, assignee=assignee)
+            issue = self.repo.create_issue(title, body=msg, assignee=assignee,
+                                           labels=lbl_objs)
             logging.info('Issue created as #%s', issue.id)
             return True
         except GithubException as e:
             GitHubConnector.log_exception(e.data)
+            return False

@@ -57,8 +57,8 @@ def blast_issues(csv_file, title, msg_file, start_from):
 
     logging.info('Creating issues for %d user(s)', num_issues)
 
-    for user in user_list[:num_issues]:
-        is_created = ghc.create_issue(title, message, user)
+    for user, label in user_list[:num_issues]:
+        is_created = ghc.create_issue(title, message, user, [label])
         if not is_created:
             logging.error('Unable to create issue for user: %s', user)
             failed_users.append(user)
