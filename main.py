@@ -4,7 +4,7 @@ from connectors.github import GitHubConnector
 
 import parsers
 
-import argparse, sys, logging
+import argparse, logging, sys, time
 
 logging.basicConfig(filename='log.log',level=logging.DEBUG)
 
@@ -62,6 +62,7 @@ def blast_issues(csv_file, title, msg_file, start_from):
         if not is_created:
             logging.error('Unable to create issue for user: %s', user)
             failed_users.append(user)
+        time.sleep(2) # ensures app is within abuse rate limit
 
     num_issues = len(user_list) - len(failed_users)
 
