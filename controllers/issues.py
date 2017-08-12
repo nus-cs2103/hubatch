@@ -1,11 +1,12 @@
 """
 Issue-related tasks
 """
+from .common import BaseController
 import parsers
 
 import logging, time
 
-class IssueController:
+class IssueController(BaseController):
     def __init__(self, ghc):
         self.ghc = ghc
 
@@ -13,6 +14,11 @@ class IssueController:
         """
         Sets up the subparser for issue blaster
         """
+        parser = subparsers.add_parser('issues', help='GitHub issue management tools')
+        issue_subparsers = parser.add_subparsers(help='name of tool to execute')
+        self.setup_blast_args(issue_subparsers)
+
+    def setup_blast_args(self, subparsers):
         parser = subparsers.add_parser('blast', help='mass-create same issue for a list of GitHub users')
         parser.add_argument('csv', metavar='csv', type=str,
                             help='filename of the CSV containing a list of GitHub usernames')
