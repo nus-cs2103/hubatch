@@ -25,7 +25,7 @@ class GHAPI:
         auth_tuple = ('token', api_key)
         r = None
         try:
-            r = requests.get(url, auth=auth_tuple)
+            r = requests.put(url, auth=auth_tuple)
         except requests.exceptions.RequestException as e:
             cls.handle_api_exception(None)
             return False
