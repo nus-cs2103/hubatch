@@ -44,33 +44,34 @@ class IssueController(BaseController):
         Creates a unique issue with identical content for
         every GitHub user in a specified CSV file
         """
-        user_list = parsers.csvparser.get_rows_as_list(csv_file)
+        user_tag_list = parsers.csvparser.get_rows_as_list(csv_file)
+        user_list = [x[0] for x in user_tag_list]
         message = parsers.common.get_contents(msg_file)
 
         if start_from and start_from in user_list:
-            user_list = user_list[user_list.index(start_from):]
+            user_tag_list = user_tag_list[user_list.index(start_from):]
 
         failed_users = []
 
         quota = self.ghc.get_remaining_quota()
-        num_issues = min(quota, len(user_list))
+        num_issues = min(quota, len(user_tag_list))
 
-        if quota < len(user_list):
+        if quota < len(user_tag_list):
             num_issues = quota
             print('Insufficient quota! Run again (when quota resets) from', user_list[quota], 'user onwards!')
             logging.warn('Insufficient API quota!')
-            logging.warn('Creating issues for users up till: %s (Next user: %s)', user_list[quota - 1],  user_list[quota])
+            logging.warn('Creating issues for users up till: %s (Next user: %s)', user_tag_list[quota - 1][0],  user_tag_list[quota][0])
 
         logging.info('Creating issues for %d user(s)', num_issues)
 
-        for user, label in user_list[:num_issues]:
+        for user, label in user_tag_list[:num_issues]:
             is_created = self.ghc.create_issue(title, message, user, [label])
             if not is_created:
                 logging.error('Unable to create issue for user: %s', user)
                 failed_users.append(user)
             time.sleep(2) # ensures app is within abuse rate limit
 
-        num_issues = len(user_list) - len(failed_users)
+        num_issues = len(user_tag_list) - len(failed_users)
 
         logging.info('Blasting completed! %d issues created!', num_issues)
 
