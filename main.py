@@ -9,7 +9,7 @@ import argparse, logging, sys
 logging.basicConfig(filename='log.log',level=logging.DEBUG)
 
 cfg = AppConfig()
-ghc = GitHubConnector(cfg.get_api_key(), cfg.get_repo())
+ghc = GitHubConnector(cfg.get_api_key(), cfg.get_repo(), cfg.get_organisation())
 issue_ctrl = IssueController(ghc)
 org_ctrl = OrganisationController(ghc)
 
@@ -23,7 +23,7 @@ def setup_argparse():
     return parser
 
 if __name__ == '__main__':
-    logging.info('Kena Arrowed - GitHub issue manager started!')
+    logging.info('Kena Arrowed - GitHub CLI tools: Started!')
     parser = setup_argparse()
     args = parser.parse_args()
 
