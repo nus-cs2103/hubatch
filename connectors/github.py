@@ -1,13 +1,16 @@
 from github import Github, GithubException
+from .ghapi import GHAPI
 
 import logging
 
 class GitHubConnector:
-    def __init__(self, apikey, repo):
+    def __init__(self, apikey, repo, org):
         try:
+            self.api_key = apikey
             self.gh = Github(apikey)
             self.repo = self.gh.get_repo(repo)
             self.labels = self.get_labels()
+            self.organisation = self.gh.get_organization(org)
         except GithubException as e:
             GitHubConnector.log_exception(e.data)
 
@@ -60,3 +63,12 @@ class GitHubConnector:
         except GithubException as e:
             GitHubConnector.log_exception(e.data)
             return False
+
+    def add_user_to_organisation(self, user):
+        """Add a user to an organisation as a member"""
+        if not self.is_api_available():
+            return False
+
+        logging.info('Inviting user %s to %s', user, self.organisation.login)
+
+        return GHAPI.invite_user(self.api_key, self.organisation.login, user)
