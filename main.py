@@ -23,7 +23,7 @@ def setup_argparse():
     return parser
 
 if __name__ == '__main__':
-    logging.info('Kena Arrowed - GitHub CLI tools: Started!')
+    logging.info('hubatch - GitHub CLI tools: Started!')
     parser = setup_argparse()
     args = parser.parse_args()
 

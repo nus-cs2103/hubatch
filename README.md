@@ -1,4 +1,4 @@
-# kena-arrow
+# hubatch
 CLI tools for GitHub repository/organisation managers
 
 ## Features
