@@ -72,3 +72,12 @@ class GitHubConnector:
         logging.info('Inviting user %s to %s', user, self.organisation.login)
 
         return GHAPI.invite_user(self.api_key, self.organisation.login, user)
+
+    def add_user_to_team(self, user, teamid):
+        """Add a user to a team as a member"""
+        if not self.is_api_available():
+            return False
+
+        logging.info('Inviting user %s to team id: %s', user, teamid)
+
+        return GHAPI.invite_user_team(self.api_key, teamid, user)

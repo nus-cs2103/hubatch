@@ -36,3 +36,22 @@ class GHAPI:
         except requests.exceptions.HTTPError as e:
             cls.handle_api_exception(r)
             return False
+
+    @classmethod
+    def invite_user_team(cls, api_key, team_id, username):
+        """Invites a particular user to a team"""
+        url = '{}/teams/{}/memberships/{}'.format(cls.BASE_URL, team_id, username)
+        auth_tuple = ('token', api_key)
+        r = None
+        try:
+            r = requests.put(url, auth=auth_tuple)
+        except requests.exceptions.RequestException as e:
+            cls.handle_api_exception(None)
+            return False
+
+        try:
+            r.raise_for_status()
+            return True
+        except requests.exceptions.HTTPError as e:
+            cls.handle_api_exception(r)
+            return False
