@@ -64,8 +64,9 @@ class IssueController(BaseController):
 
         logging.info('Creating issues for %d user(s)', num_issues)
 
-        for user, label in user_tag_list[:num_issues]:
-            is_created = self.ghc.create_issue(title, message, user, [label])
+        for (user, user_title, *labels) in user_tag_list[:num_issues]:
+            final_title = title.format(user_title)
+            is_created = self.ghc.create_issue(final_title, message, user, labels)
             if not is_created:
                 logging.error('Unable to create issue for user: %s', user)
                 failed_users.append(user)
