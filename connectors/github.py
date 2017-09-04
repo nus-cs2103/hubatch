@@ -1,4 +1,4 @@
-from github import Github, GithubException
+from github import Github, GithubObject, GithubException
 from .ghapi import GHAPI
 
 import logging
@@ -51,6 +51,8 @@ class GitHubConnector:
         """Creates an Issue in a given repository"""
         if not self.is_api_available():
             return False
+        elif assignee is None:
+            assignee = GithubObject.NotSet
 
         logging.info('Creating issue %s for %s', title, assignee)
         lbl_objs = self.strs_to_labels(labels)
@@ -62,7 +64,11 @@ class GitHubConnector:
             return True
         except GithubException as e:
             GitHubConnector.log_exception(e.data)
-            return False
+            if assignee is None:
+                return False
+            else:
+                # try without assignee
+                return self.create_issue(title, msg, None, labels)
 
     def add_user_to_organisation(self, user):
         """Add a user to an organisation as a member"""
