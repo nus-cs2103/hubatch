@@ -19,5 +19,5 @@ def are_files_readable(*filenames):
 
 def get_contents(filename):
     """Retrieves contents of a given file"""
-    with open(filename) as f:
+    with open(filename, encoding="utf-8") as f:
         return f.read()
