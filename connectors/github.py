@@ -47,6 +47,14 @@ class GitHubConnector:
         ratelimit = self.gh.get_rate_limit()
         return ratelimit.rate.remaining
 
+    def get_issues(self):
+        """Gets all issues in a given repository"""
+        try:
+            return self.repo.get_issues()
+        except GithubException as e:
+            GitHubConnector.log_exception(e.data)
+            return []
+
     def create_issue(self, title, msg, assignee, labels=[]):
         """Creates an Issue in a given repository"""
         if not self.is_api_available():
