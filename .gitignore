@@ -102,3 +102,6 @@ ENV/
 
 # Repo-specific excludes
 config.cfg
+
+# Ignore private folder
+private/
