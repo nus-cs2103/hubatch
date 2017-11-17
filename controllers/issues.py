@@ -66,21 +66,23 @@ class IssueController(BaseController):
         '''
         first_repo_issues = self.ghc.get_issues_from_repository(fromrepo)
         mapping_dict = parsers.csvparser.get_rows_as_dict(mapping_file)
+        REF_TEMPLATE = '\n\n<sub>[original: {}#{}]</sub>'
 
         if not offset:
             offset = 0
 
         for idx, issue in enumerate(first_repo_issues[offset:]):
             from_mapping = re.search('\[(.*?)\]', issue.title)
-            new_title = issue.title
+            to_mapping = []
+            new_title = issue.title.split(']', 1)[-1]
+            new_body = issue.body + REF_TEMPLATE.format(fromrepo, issue.number)
 
             if from_mapping:
                 from_mapping = from_mapping.group(1)
                 print(from_mapping)
                 to_mapping = mapping_dict.get(from_mapping, from_mapping)
-                new_title = '[{}] {}'.format(to_mapping, issue.title)
 
-            is_transferred = self.ghc.create_issue(new_title, issue.body, None, [], torepo)
+            is_transferred = self.ghc.create_issue(new_title, new_body, None, to_mapping, torepo)
 
             if not is_transferred:
                 logging.error('Unable to create issue with idx: %s', user)
