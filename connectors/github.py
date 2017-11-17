@@ -55,7 +55,16 @@ class GitHubConnector:
             GitHubConnector.log_exception(e.data)
             return []
 
-    def create_issue(self, title, msg, assignee, labels=[]):
+    def get_issues_from_repository(self, repo_name):
+        '''Gets issues from a specified repository'''
+        try:
+            repo = self.gh.get_repo(repo_name)
+            return repo.get_issues(direction='asc')
+        except GithubException as e:
+            GitHubConnector.log_exception(e.data)
+            return []
+
+    def create_issue(self, title, msg, assignee, labels=[], repo=None):
         """Creates an Issue in a given repository"""
         if not self.is_api_available():
             return False
@@ -66,8 +75,11 @@ class GitHubConnector:
         lbl_objs = self.strs_to_labels(labels)
 
         try:
-            issue = self.repo.create_issue(title, body=msg, assignee=assignee,
-                                           labels=lbl_objs)
+            repo_obj = self.repo
+            if repo is not None:
+               repo_obj = self.gh.get_repo(repo)
+            issue = repo_obj.create_issue(title, body=msg, assignee=assignee,
+                                          labels=lbl_objs)
             logging.info('Issue created as #%s', issue.id)
             return True
         except GithubException as e:

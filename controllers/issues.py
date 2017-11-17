@@ -4,7 +4,7 @@ Issue-related tasks
 from .common import BaseController
 import parsers
 
-import logging, time
+import logging, re, time
 
 class IssueController(BaseController):
     def __init__(self, ghc):
@@ -17,6 +17,7 @@ class IssueController(BaseController):
         parser = subparsers.add_parser('issues', help='GitHub issue management tools')
         issue_subparsers = parser.add_subparsers(help='name of tool to execute')
         self.setup_blast_args(issue_subparsers)
+        self.setup_copy_args(issue_subparsers)
 
     def setup_blast_args(self, subparsers):
         parser = subparsers.add_parser('blast', help='mass-create same issue for a list of GitHub users')
@@ -30,6 +31,18 @@ class IssueController(BaseController):
                             help='start adding from a particular user (inclusive) in the CSV')
         parser.set_defaults(func=self.blast_command)
 
+    def setup_copy_args(self, subparsers):
+        parser = subparsers.add_parser('copy', help='copies issues from one repository to another')
+        parser.add_argument('fromrepo', metavar='from', type=str,
+                            help='repository from which we should copy')
+        parser.add_argument('torepo', metavar='to', type=str,
+                            help='repository to which we should copy to')
+        parser.add_argument('-m', '--mapping', metavar='csv', type=str,
+                            help='filename of CSV containing the title tag mapping')
+        parser.add_argument('-s', '--start-from', metavar='index', type=int,
+                            help='start copying from a particular index')
+        parser.set_defaults(func=self.copy_command)
+
     def blast_command(self, args):
         logging.debug('Issue title: %s', args.title)
         logging.debug('CSV file: %s and MD file: %s', args.csv, args.msg)
@@ -38,6 +51,39 @@ class IssueController(BaseController):
             self.blast_issues(args.csv, args.title, args.msg, args.start_from)
         else:
             sys.exit(1)
+
+    def copy_command(self, args):
+        logging.debug('Copying from %s to %s', args.fromrepo, args.torepo)
+
+        if parsers.common.are_files_readable(args.mapping):
+            self.copy_issues(args.mapping, args.fromrepo, args.torepo, args.start_from)
+        else:
+            sys.exit(1)
+
+    def copy_issues(self, mapping_file, fromrepo, torepo, offset):
+        '''
+        Copies issues from one repository to another
+        '''
+        first_repo_issues = self.ghc.get_issues_from_repository(fromrepo)
+        mapping_dict = parsers.csvparser.get_rows_as_dict(mapping_file)
+
+        if not offset:
+            offset = 0
+
+        for idx, issue in enumerate(first_repo_issues[offset:]):
+            from_mapping = re.search('\[(.*?)\]', issue.title)
+            new_title = issue.title
+
+            if from_mapping:
+                from_mapping = from_mapping.group(1)
+                print(from_mapping)
+                to_mapping = mapping_dict.get(from_mapping, from_mapping)
+                new_title = '[{}] {}'.format(to_mapping, issue.title)
+
+            is_transferred = self.ghc.create_issue(new_title, issue.body, None, [], torepo)
+
+            if not is_transferred:
+                logging.error('Unable to create issue with idx: %s', user)
 
     def blast_issues(self, csv_file, title, msg_file, start_from):
         """
