@@ -38,6 +38,15 @@ You can use the example files located in the `example` folder as a reference. Th
 All log entries for this program is stored in `log.log` on the root directory
 (i.e. where `main.py` resides)
 
+### Getting the team ID for `mass-add`
+
+You need to call the API to get the integer team ID for `mass-add` using `-t` option.
+
+Use the following command on a `bash` shell to get the integer ID:
+`curl -H "Authorization: token <put your token here>" https://api.github.com/orgs/<org-name-here>/teams`
+
+This returns a JSON string from which you can retrieve the team ID.
+
 ## Legal Notice
 
 GitHub is a trademark of GitHub Inc. All other trademarks and servicemarks are the property of their respective owners/holders.
