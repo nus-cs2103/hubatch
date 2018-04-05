@@ -68,6 +68,10 @@ class IssueController(BaseController):
         mapping_dict = parsers.csvparser.get_rows_as_dict(mapping_file) if mapping_file is not None else {}
         REF_TEMPLATE = '\n\n<sub>[original: {}#{}]</sub>'
 
+        if torepo.count('{}') > 1:
+            logging.error('torepo contains more than 1 replacement field!')
+            sys.exit(1)
+
         if not offset:
             offset = 0
 
@@ -79,13 +83,17 @@ class IssueController(BaseController):
 
             if from_mapping:
                 from_mapping = from_mapping.group(1)
-                print(from_mapping)
-                to_mapping = mapping_dict.get(from_mapping, from_mapping)
+                to_mapping = mapping_dict.get(from_mapping, [])
 
-            is_transferred = self.ghc.create_issue(new_title, new_body, None, to_mapping, torepo)
+            try:
+                actl_to_repo = torepo.format(to_mapping[0])
+            except IndexError:
+                actl_to_repo = torepo.format('')
+
+            is_transferred = self.ghc.create_issue(new_title, new_body, None, to_mapping, actl_to_repo)
 
             if not is_transferred:
-                logging.error('Unable to create issue with idx: %s', user)
+                logging.error('[%d][#%d][%s -> %s] Unable to copy', idx, issue.number, fromrepo, actl_to_repo)
 
     def blast_issues(self, csv_file, title, msg_file, start_from):
         """
