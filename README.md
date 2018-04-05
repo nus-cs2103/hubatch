@@ -40,12 +40,12 @@ All log entries for this program is stored in `log.log` on the root directory
 
 ### Getting the team ID for `mass-add`
 
-We need to use the API to get the integer team ID for `mass-add` using `-t` option.
+You need to call the API to get the integer team ID for `mass-add` using `-t` option.
 
 Use the following command on a `bash` shell to get the integer ID:
 `curl -H "Authorization: token <put your token here>" https://api.github.com/orgs/<org-name-here>/teams`
 
-This returns a JSON string from which we can retrieve the team ID.
+This returns a JSON string from which you can retrieve the team ID.
 
 ## Legal Notice
 
