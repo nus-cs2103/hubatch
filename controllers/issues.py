@@ -4,7 +4,7 @@ Issue-related tasks
 from .common import BaseController
 import parsers
 
-import logging, re, time, sys
+import argparse, logging, re, time, sys
 
 class IssueController(BaseController):
     def __init__(self, ghc):
@@ -32,11 +32,19 @@ class IssueController(BaseController):
         parser.set_defaults(func=self.blast_command)
 
     def setup_copy_args(self, subparsers):
-        parser = subparsers.add_parser('copy', help='copies issues from one repository to another')
+        help_text = 'copies issues from one repository to another'
+        example_text = '''example:
+  python main.py octocat/source octocat/destination
+  python main.py -m mymapping.csv octocat/source octocat/destination
+  python main.py -m mymapping.csv octocat/source octo{}/destination'''
+        parser = subparsers.add_parser('copy',
+                                 help=help_text,
+                                 epilog=example_text,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
         parser.add_argument('fromrepo', metavar='from', type=str,
-                            help='repository from which we should copy')
+                            help='repository to copy from, in {owner}/{name} format')
         parser.add_argument('torepo', metavar='to', type=str,
-                            help='repository to which we should copy to')
+                            help='repository to copy from, in {owner}/{name} format. If a replacement field ({}) is specified, it will be replaced with the first tag in the mapping.')
         parser.add_argument('-m', '--mapping', metavar='csv', type=str,
                             help='filename of CSV containing the title tag mapping')
         parser.add_argument('-s', '--start-from', metavar='index', type=int,
