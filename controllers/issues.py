@@ -4,7 +4,7 @@ Issue-related tasks
 from .common import BaseController
 import parsers
 
-import logging, re, time
+import logging, re, time, sys
 
 class IssueController(BaseController):
     def __init__(self, ghc):
