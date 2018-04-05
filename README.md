@@ -26,6 +26,7 @@ $ python main.py [group] [tool] [tool-parameters ...|-h]
 
 * `issues` -- Issue Management Tools
   * `blast` -- Create duplicated issues for a list of GitHub users
+  * `copy` -- Duplicate issues from one GitHub repository to another
 * `orgs` -- GitHub Organisation Management Tools
   * `mass-add` -- Invite a list of users to join a particular organisation
 
