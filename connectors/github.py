@@ -84,7 +84,7 @@ class GitHubConnector:
             return True
         except GithubException as e:
             GitHubConnector.log_exception(e.data)
-            if assignee is None:
+            if assignee is GithubObject.NotSet:
                 return False
             else:
                 # try without assignee
