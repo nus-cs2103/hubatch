@@ -4,7 +4,7 @@ Issue-related tasks
 from .common import BaseController
 import parsers
 
-import logging, re, time
+import logging, re, time, sys
 
 class IssueController(BaseController):
     def __init__(self, ghc):
@@ -55,7 +55,7 @@ class IssueController(BaseController):
     def copy_command(self, args):
         logging.debug('Copying from %s to %s', args.fromrepo, args.torepo)
 
-        if parsers.common.are_files_readable(args.mapping):
+        if args.mapping is None or parsers.common.are_files_readable(args.mapping):
             self.copy_issues(args.mapping, args.fromrepo, args.torepo, args.start_from)
         else:
             sys.exit(1)
@@ -65,7 +65,7 @@ class IssueController(BaseController):
         Copies issues from one repository to another
         '''
         first_repo_issues = self.ghc.get_issues_from_repository(fromrepo)
-        mapping_dict = parsers.csvparser.get_rows_as_dict(mapping_file)
+        mapping_dict = parsers.csvparser.get_rows_as_dict(mapping_file) if mapping_file is not None else {}
         REF_TEMPLATE = '\n\n<sub>[original: {}#{}]</sub>'
 
         if not offset:
