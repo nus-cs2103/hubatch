@@ -28,7 +28,9 @@ $ python main.py [group] [tool] [tool-parameters ...|-h]
   * `blast` -- Create duplicated issues for a list of GitHub users
   * `copy` -- Duplicate issues from one GitHub repository to another
 * `orgs` -- GitHub Organisation Management Tools
-  * `mass-add` -- Invite a list of users to join a particular organisation
+  * `mass-add` -- Invite a list of users to join a particular organisation<br>
+     e.g., `python main.py org mass-add -t 12345 usernames.csv` where `12345` is the team ID.<br>
+     Use the URL `https://api.github.com/orgs/YOUR_ORG/teams?access_token=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN` to find the team ID.
 
 To find out more about the positional/named parameters for a particular tool, run the tool with the `-h` flag.
 
