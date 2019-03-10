@@ -105,3 +105,5 @@ config.cfg
 
 # Ignore private folder
 private/
+.idea/
+*.iml
